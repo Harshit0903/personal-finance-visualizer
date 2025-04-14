@@ -4,12 +4,31 @@ import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 type Transaction = {
   id: number
   amount: number
   date: string
   description: string
+}
+
+const generateChartData = (transactions: Transaction[]) => {
+  const expensesByMonth: { [key: string]: number } = {}
+
+  transactions.forEach((tx) => {
+    const month = tx.date.substring(0, 7) // Get the 'YYYY-MM' part of the date
+    if (!expensesByMonth[month]) {
+      expensesByMonth[month] = 0
+    }
+    expensesByMonth[month] += tx.amount
+  })
+
+  // Convert to an array of { month, totalAmount }
+  return Object.keys(expensesByMonth).map((month) => ({
+    month,
+    totalAmount: expensesByMonth[month],
+  }))
 }
 
 export default function Home() {
@@ -37,10 +56,13 @@ export default function Home() {
     setForm({ amount: '', date: '', description: '' })
   }
 
+  const chartData = generateChartData(transactions)
+
   return (
     <main className="max-w-xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Add Transaction</h1>
 
+      {/* Add Transaction Form */}
       <Card className="mb-6">
         <CardContent className="p-4 space-y-4">
           <Input
@@ -67,8 +89,9 @@ export default function Home() {
         </CardContent>
       </Card>
 
+      {/* Transaction List */}
       <h2 className="text-xl font-semibold mb-2">Transactions</h2>
-      {transactions.map(tx => (
+      {transactions.map((tx) => (
         <Card key={tx.id} className="mb-2">
           <CardContent className="p-4 flex justify-between">
             <div>
@@ -79,6 +102,19 @@ export default function Home() {
           </CardContent>
         </Card>
       ))}
+
+      {/* Monthly Expenses Bar Chart */}
+      <h2 className="text-xl font-semibold mb-4">Monthly Expenses</h2>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="month" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="totalAmount" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer>
     </main>
   )
 }
