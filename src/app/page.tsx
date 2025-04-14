@@ -40,9 +40,11 @@ export default function Home() {
   }
 
   const handleSubmit = () => {
+    // **This is the added validation code**
     if (!form.amount || !form.date || !form.description) {
-      alert("All fields are required")
+      alert("All fields are required")  // Alert if fields are empty
       return
+        // Prevent form submission
     }
 
     const newTransaction: Transaction = {
